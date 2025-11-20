@@ -62,7 +62,7 @@ public class StepDefs
             currentRow = excelData.get(currentRowIndex);
             System.out.println("\n=== Starting scenario for row " + (currentRowIndex + 1) + " ===");
 
-            // STEP 1 — تحميل بيانات الشركة من BTC_NAME
+            // STEP 1 — Load Company Data //
             if (!executeStep(1)) {
                 currentRowIndex++;
                 continue;
@@ -117,7 +117,7 @@ public class StepDefs
 
                 case 1:
                     // Step 1: Load company name
-                    String btcName = currentRow[1];   // اسم الشركة من الإكسيل
+                    String btcName = currentRow[1];
                     loadCompanyData(btcName);
 
                     System.out.println("Step 1 PASSED - Loaded Company: " + btcName);
