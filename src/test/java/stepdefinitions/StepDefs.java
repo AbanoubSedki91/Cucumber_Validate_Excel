@@ -10,9 +10,9 @@ import java.util.List;
 public class StepDefs
 {
 
-    // ───────────────────────────────────────────────
-    //  GLOBAL VARIABLES (مستخدمات في كل المشروع)
-    // ───────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //  GLOBAL VARIABLES to store CompanyName , CompanyCode , CompanyCategory
+    // ─────────────────────────────────────────────────────────────────────────────────────//
     private String companyName;
     private String companyCode;
     private CategoryType companyCategory;
@@ -23,9 +23,9 @@ public class StepDefs
     private static int currentRowIndex = 0;
     private String[] currentRow;
 
-    // ───────────────────────────────────────────────
-    //  FUNCTION تحميل بيانات الشركة من الـ BTC_NAME
-    // ───────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //  Function tha pass BTC_Name to load all data for specific every Company
+    // ─────────────────────────────────────────────────────────────────────────────────────//
     private void loadCompanyData(String BTC_NAME) throws Exception {
 
         selectedCompany = CompanyType.fromName(BTC_NAME);
