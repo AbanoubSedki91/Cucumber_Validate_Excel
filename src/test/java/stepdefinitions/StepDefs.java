@@ -113,21 +113,42 @@ public class StepDefs
 
         try {
 
-            if (stepNumber == 1) {
-                // BTC_NAME = currentRow[0]
-                String btcName = currentRow[1];
-                loadCompanyData(btcName);
-            }
+            switch (stepNumber) {
 
-            double amount = Double.parseDouble(currentRow[5].replace(",", ""));
+                case 1:
+                    // Step 1: Load company name
+                    String btcName = currentRow[1];   // اسم الشركة من الإكسيل
+                    loadCompanyData(btcName);
 
-            if (amount > 100) {
-                System.out.println("Step " + stepNumber + ": Amount greater than 100 (Amount=" + amount + ")");
-                System.out.println("Skipping remaining steps for this row...");
-                return false;
-            } else {
-                System.out.println("Step " + stepNumber + ": PASSED (Amount=" + amount + ")");
-                return true;
+                    System.out.println("Step 1 PASSED - Loaded Company: " + btcName);
+                    return true;
+
+
+                case 2:
+                    // Step 2: Check amount only
+                    double amount = Double.parseDouble(currentRow[5].replace(",", ""));
+
+                    if (amount > 100) {
+                        System.out.println("Step 2 FAILED - Amount too large: " + amount);
+                        return false;
+                    }
+
+                    System.out.println("Step 2 PASSED - Amount valid: " + amount);
+                    return true;
+
+
+                case 3:
+                    // Step 3 logic
+                    System.out.println("Step 3 executed");
+                    return true;
+
+                case 4:
+                    // Step 4 logic
+                    System.out.println("Step 4 executed");
+                    return true;
+
+                default:
+                    return false;
             }
 
         } catch (Exception e) {
@@ -135,4 +156,5 @@ public class StepDefs
             return false;
         }
     }
+
 }
