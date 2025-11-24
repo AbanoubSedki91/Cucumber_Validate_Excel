@@ -8,5 +8,10 @@ Feature: validate_excel
     Then Load Company Data
     Then IsBillPaid
     Then Step 2
-    Then Step 3
-    Then Step 4
+    Then Generate bill payment code for current category
+    Then Print "<BillPaymentCode>"
+    Then CheckPaidSuccessfully
+
+    Examples:
+      | BillPaymentCode  |
+      | <billpaymentcode> |
