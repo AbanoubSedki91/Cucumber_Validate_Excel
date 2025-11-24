@@ -7,28 +7,31 @@ import utils.ExcelUtils;
 
 import java.util.List;
 
-public class StepDefs
-{
+public class StepDefs {
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //  Private Variables to store CompanyName , CompanyCode , CompanyCategory
+    //       Private Variables to store CompanyName , CompanyCode , CompanyCategory
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private String companyName;
     private String companyCode;
+    private String categoryCode;
     private CategoryType companyCategory;
     private CompanyType selectedCompany;
 
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //                           Billing Account Number
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    private String billingAccountNumber;
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //  Private Variables to store Bill paid or not
+    //        Private Variables to store Bill paid or not
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private boolean ElectricityBill = false;
     private boolean WaterBill = false;
     private boolean GasBill = false;
 
-
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //  Given Variables for read Testing Data from Excel sheet
+    //         Given Variables for read Testing Data from Excel sheet
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private boolean stopExcelLoop = false;
     private static List<String[]> excelData;
@@ -36,32 +39,31 @@ public class StepDefs
     private String[] currentRow;
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //  Function tha pass BTC_Name to load all data for specific every Company
+    //      Function tha pass BTC_Name to load all data for specific every Company
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private void loadCompanyData(String BTC_NAME) throws Exception {
-
         selectedCompany = CompanyType.fromName(BTC_NAME);
-
         if (selectedCompany == null) {
             throw new Exception("❌ Company name NOT found in enum: " + BTC_NAME);
         }
 
-        companyName     = selectedCompany.getName();
-        companyCode     = selectedCompany.getCode();
+        companyName = selectedCompany.getName();
+        companyCode = selectedCompany.getCode();
         companyCategory = selectedCompany.getCategory();
+        categoryCode = companyCategory.getCode();
 
         System.out.println("\nLoaded Company Data:");
         System.out.println("Company: " + companyName);
-        System.out.println("Code: " + companyCode);
+        System.out.println("Company Code: " + companyCode);
         System.out.println("Category: " + companyCategory);
+        System.out.println("Category Code: " + categoryCode);
     }
 
-    // ───────────────────────────────────────────────
-    //                 GIVEN
-    // ───────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //                 GIVEN Read Data Testing From Excel Sheet
+    // ─────────────────────────────────────────────────────────────────────────────────────//
     @Given("Read Data Testing From Excel Sheet")
-    public void i_start_the_scenario()
-    {
+    public void i_start_the_scenario() {
         if (excelData == null) {
             excelData = ExcelUtils.readAllRows(
                     "D:/AutomationWork/Cash_Regression_Framework/" +
@@ -92,7 +94,7 @@ public class StepDefs
                 continue;
             }
 
-            // STEP 3
+            // STEP 3 — IsBillPaid
             if (!executeStep(3)) {
                 currentRowIndex++;
                 continue;
@@ -112,40 +114,46 @@ public class StepDefs
     }
 
     @Then("Load Company Data")
-    public void step1() { }
+    public void step1() {
+    }
 
     @Then("Step 2")
-    public void step2() { }
+    public void step2() {
+    }
 
     @Then("IsBillPaid")
-    public void step3() { }
+    public void step3() {
+    }
 
     @Then("CheckPaidSuccessfully")
-    public void step4() { }
+    public void step4() {
+    }
 
 
-    // ───────────────────────────────────────────────
-    //   EXECUTE EACH STEP
-    // ───────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //                                EXECUTE EACH STEP
+    // ─────────────────────────────────────────────────────────────────────────────────────//
     private boolean executeStep(int stepNumber) {
-
         try {
 
-            switch (stepNumber)
-            {
+            switch (stepNumber) {
                 // ─────────────────────────────────────────────────────────────────────
-                //   Step 1— Load company name
+                //                     Step 1— Load company name
                 // ─────────────────────────────────────────────────────────────────────
                 case 1:
                     // Step 1: Load company name
                     String btcName = currentRow[1];
                     loadCompanyData(btcName);
 
+                    // Load Billing Account Number from Excel (column index 10)
+                    billingAccountNumber = currentRow[10];
+                    System.out.println("Billing Account Number: " + billingAccountNumber);
+
                     System.out.println("Step 1 PASSED - Loaded Company: " + btcName);
                     return true;
 
                 // ─────────────────────────────────────────────────────────────────────
-                //   Step 2- Check bill value Less than 50 pounds for payment
+                //          Step 2- Check bill value Less than 50 pounds for payment
                 // ──────────────────────────────────────────────────────────────────────
                 case 2:
                     // Step 2: Check amount only
@@ -160,7 +168,7 @@ public class StepDefs
                     return true;
 
                 // ─────────────────────────────────────────────────────────────────────
-                //   Step 3- Check 3 bill "Electricity , Water , Gas" paid or not
+                //       Step 3- Check 3 bill "Electricity , Water , Gas" paid or not
                 // ──────────────────────────────────────────────────────────────────────
                 case 3:
                     System.out.println("Step 3 running... Checking bill types.");
@@ -177,7 +185,8 @@ public class StepDefs
 
                     switch (currentCategory) {
                         case ELECTRICITY:
-                            if (!ElectricityBill) System.out.println("Electricity bill not processed yet → Mark pending.");
+                            if (!ElectricityBill)
+                                System.out.println("Electricity bill not processed yet → Mark pending.");
                             else System.out.println("Electricity bill already processed.");
                             break;
 
@@ -199,9 +208,8 @@ public class StepDefs
                     return true;
 
                 // ─────────────────────────────────────────────────────────────────────
-                //   Step 4- Check bill paid successfully
+                //                Step 4- Check bill paid successfully
                 // ──────────────────────────────────────────────────────────────────────
-
                 case 4:
                     System.out.println("Step 4 running... Checking payment message.");
                     String paymentMessage = "تم الدفع بنجاح"; // static for now
@@ -240,5 +248,7 @@ public class StepDefs
             return false;
         }
     }
-
 }
+
+
+
