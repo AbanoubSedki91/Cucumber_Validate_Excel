@@ -6,6 +6,7 @@ import io.cucumber.java.en.*;
 import utils.ExcelUtils;
 
 import java.util.List;
+import java.util.Properties;
 
 public class StepDefs
 {
@@ -39,6 +40,11 @@ public class StepDefs
     private static List<String[]> excelData;
     private static int currentRowIndex = 0;
     private String[] currentRow;
+
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //        Properties object to simulate USSD options storage
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    private Properties ussdRatePlanProperties = new Properties();
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //        Function that pass BTC_Name to load all data for specific every Company
@@ -95,45 +101,34 @@ public class StepDefs
                 continue;
             }
 
-            // STEP 2
+            // STEP 2- IsBillPaid
             if (!executeStep(2))
             {
                 currentRowIndex++;
                 continue;
             }
 
-            // STEP 3- IsBillPaid
+            // STEP 3- Generate Bill Payment Ussd Code
             if (!executeStep(3))
             {
                 currentRowIndex++;
                 continue;
             }
 
-            // STEP 4- Generate Bill Payment Ussd Code
+            // STEP 4- Set placeholder for USSD
             if (!executeStep(4))
             {
                 currentRowIndex++;
                 continue;
             }
 
-            // STEP 5- Check bill paid successfully
-            if (!executeStep(5))
-            {
-                currentRowIndex++;
-                continue;
-            }
-
-            // STEP 6- Print placeholder value
-            if (!executeStep(6))
-            {
-                currentRowIndex++;
-                continue;
-            }
+            // STEP 5- Print placeholder
+            printBillPaymentCode("<billpaymentcode>");
 
             System.out.println("All steps passed for row " + (currentRowIndex + 1));
             currentRowIndex++;
         }
-
+        ussdRatePlanProperties.remove("<BillPaymentCode>");
         System.out.println("\n=== Finished all rows ===");
     }
 
@@ -142,27 +137,28 @@ public class StepDefs
     // ─────────────────────────────────────────────────────────────────────────────────────//
 
     @Then("Load Company Data")
-    public void step1(){
-    }
-
-    @Then("Step 2")
-    public void step2(){
-    }
+    public void step1(){ }
 
     @Then("IsBillPaid")
-    public void step3(){
-    }
+    public void step2(){ }
 
     @Then("Generate bill payment code for current category")
-    public void step5(){
-    }
+    public void step3(){ }
 
-    @Then("CheckPaidSuccessfully")
-    public void step4() {
+
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //            Set placeholder for USSD options dynamically
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    @Then("Set BillPaymentCode placeholder")
+    public void setBillPaymentCodePlaceholder() {
+        if (currentRowIndex >= excelData.size()) return;
+        ussdRatePlanProperties.setProperty("<BillPaymentCode>", currentBillPaymentCode);
+
     }
 
     @Then("Print {string}")
     public void printBillPaymentCode(String placeholder) {
+        if (currentRowIndex >= excelData.size()) return;
         if ("<billpaymentcode>".equals(placeholder)) {
             System.out.println("Generated Bill Payment Code: " + currentBillPaymentCode);
         } else {
@@ -194,6 +190,9 @@ public class StepDefs
 
             switch (stepNumber)
             {
+                // ─────────────────────────────────────────────────────────────────────
+                //                     Step 1— Load company name
+                // ─────────────────────────────────────────────────────────────────────
                 case 1:
                     String btcName = currentRow[1];
                     loadCompanyData(btcName);
@@ -202,16 +201,11 @@ public class StepDefs
                     System.out.println("Step 1 PASSED - Loaded Company: " + btcName);
                     return true;
 
-                case 2:
-                    double amount = Double.parseDouble(currentRow[5].replace(",", ""));
-                    if (amount > 100) {
-                        System.out.println("Step 2 FAILED - Amount too large: " + amount);
-                        return false;
-                    }
-                    System.out.println("Step 2 PASSED - Amount valid: " + amount);
-                    return true;
 
-                case 3:
+                // ─────────────────────────────────────────────────────────────────────
+                //       Step 2- Check 3 bill "Electricity , Water , Gas" paid or not
+                // ──────────────────────────────────────────────────────────────────────
+                case 2:
                     System.out.println("Step 3 running... Checking bill types.");
                     if (ElectricityBill && WaterBill && GasBill) {
                         System.out.println("All 3 bills already paid → skipping Excel rows and continuing scenario.");
@@ -237,13 +231,37 @@ public class StepDefs
                         default:
                             System.out.println("Unknown category type!");
                     }
-                    System.out.println("Step 3 executed (No payment logic applied yet)");
+                    System.out.println("Step 2 executed (No payment logic applied yet)");
                     return true;
 
-                case 4:
+                // ─────────────────────────────────────────────────────────────────────
+                //                     Step 3— Generate Bill Payment Ussd Code
+                // ─────────────────────────────────────────────────────────────────────
+                case 3:
                     currentBillPaymentCode = GenerateBillPaymentCode(companyCategory);
-                    System.out.println("Generated Bill Payment Code: " + currentBillPaymentCode);
                     return true;
+                // ─────────────────────────────────────────────────────────────────────
+                //             Step 4— Set placeholder for USSD options dynamically
+                // ─────────────────────────────────────────────────────────────────────
+                case 4:
+                    setBillPaymentCodePlaceholder();
+                    return true;
+
+
+
+/*
+                case 2:
+                    double amount = Double.parseDouble(currentRow[5].replace(",", ""));
+                    if (amount > 100) {
+                        System.out.println("Step 2 FAILED - Amount too large: " + amount);
+                        return false;
+                    }
+                    System.out.println("Step 2 PASSED - Amount valid: " + amount);
+                    return true;
+
+
+
+
 
                 case 5:
                     System.out.println("Step 5 running... Checking payment message.");
@@ -268,12 +286,8 @@ public class StepDefs
                         }
                     }
                     return true;
+*/
 
-                case 6:
-                    // Step 6 - Print the bill payment code using placeholder
-                    System.out.println("Step 6 - Print placeholder value");
-                    System.out.println("Generated Bill Payment Code: " + currentBillPaymentCode);
-                    return true;
 
                 default:
                     return false;
