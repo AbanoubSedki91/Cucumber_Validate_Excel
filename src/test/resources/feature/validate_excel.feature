@@ -15,5 +15,5 @@ Feature: validate_excel
 
     Examples:
       | BillPaymentCode  |
-      | <billpaymentcode> |
+      | billpaymentcode |
 
