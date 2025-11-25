@@ -4,7 +4,6 @@ import Enum.CompanyType;
 import Enum.CategoryType;
 import io.cucumber.java.en.*;
 import utils.ExcelUtils;
-
 import java.util.List;
 import java.util.Properties;
 
@@ -25,6 +24,8 @@ public class StepDefs
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private String billingAccountNumber;
     private String currentBillPaymentCode;
+    private String confirmationPaymentCode;
+
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //        Private Variables to store Bill paid or not
@@ -44,10 +45,11 @@ public class StepDefs
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //        Properties object to simulate USSD options storage
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    private Properties ussdRatePlanProperties = new Properties();
+    private Properties ussdRatePlanPropertiesUtilities = new Properties();
+    private Properties ussdConfirmationPaymentCode = new Properties();
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //        Function that pass BTC_Name to load all data for specific every Company
+    //        Function tha pass BTC_Name to load all data for specific every Company
     // ─────────────────────────────────────────────────────────────────────────────────────//
     private void loadCompanyData(String BTC_NAME) throws Exception
     {
@@ -77,10 +79,11 @@ public class StepDefs
     {
         if (excelData == null) {
             excelData = ExcelUtils.readAllRows(
-                    "D:/AutomationWork/Cash_Regression_Framework/" +
-                            "TestingBill/src/test/resources/Data/DataTesting.xlsx"
+                    " D:/AutomationWork/Cash_Regression_Framework/VFCash_Regression_Framework/" +
+                            "VFCash_Framework/resources/Data/DataTesting.xlsx"
             );
         }
+
 
         while (currentRowIndex < excelData.size()) {
 
@@ -115,27 +118,39 @@ public class StepDefs
                 continue;
             }
 
-            // STEP 4- Set placeholder for USSD
+            // STEP 4- Set placeholder for Bill Payment Ussd Code
             if (!executeStep(4))
             {
                 currentRowIndex++;
                 continue;
             }
 
-            // STEP 5- Print placeholder
-            printBillPaymentCode("<billpaymentcode>");
+            // STEP 5- Generate Confirmation Bill Payment Ussd Code
+            if (!executeStep(5))
+            {
+                currentRowIndex++;
+                continue;
+            }
+
+
+            // STEP 6- Set placeholder for Confirmation Bill Payment Ussd Code
+            if (!executeStep(6))
+            {
+                currentRowIndex++;
+                continue;
+            }
+
 
             System.out.println("All steps passed for row " + (currentRowIndex + 1));
             currentRowIndex++;
         }
-        ussdRatePlanProperties.remove("<BillPaymentCode>");
+
         System.out.println("\n=== Finished all rows ===");
     }
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //                 Steps Implementation For every bill
     // ─────────────────────────────────────────────────────────────────────────────────────//
-
     @Then("Load Company Data")
     public void step1(){ }
 
@@ -145,25 +160,17 @@ public class StepDefs
     @Then("Generate bill payment code for current category")
     public void step3(){ }
 
+    @Then("Generate Confirmation Payment Code")
+    public void step5() {}
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
-    //            Set placeholder for USSD options dynamically
+    //            Set placeholder for BillPaymentCode to check invoice amount
     // ─────────────────────────────────────────────────────────────────────────────────────//
     @Then("Set BillPaymentCode placeholder")
-    public void setBillPaymentCodePlaceholder() {
+    public void setBillPaymentCodePlaceholder()
+    {
         if (currentRowIndex >= excelData.size()) return;
-        ussdRatePlanProperties.setProperty("<BillPaymentCode>", currentBillPaymentCode);
-
-    }
-
-    @Then("Print {string}")
-    public void printBillPaymentCode(String placeholder) {
-        if (currentRowIndex >= excelData.size()) return;
-        if ("<billpaymentcode>".equals(placeholder)) {
-            System.out.println("Generated Bill Payment Code: " + currentBillPaymentCode);
-        } else {
-            System.out.println("Placeholder value: " + placeholder);
-        }
+        ussdRatePlanPropertiesUtilities .setProperty("<BillPaymentCode>", currentBillPaymentCode);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────────────//
@@ -176,7 +183,33 @@ public class StepDefs
             case WATER:
                 return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1";
             case GAS:
-                return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1";
+                return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1" ;
+            default:
+                return "";
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //            Set placeholder for  Confirmation Bill Payment Ussd Code
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    @Then("Set ConfirmationPaymentCode placeholder")
+    public void setConfirmationPaymentCodePlaceholder()
+    {
+        if (currentRowIndex >= excelData.size()) return;
+        ussdConfirmationPaymentCode .setProperty("<confirmationpaymentcode>", confirmationPaymentCode);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    //                          Generate Confirmation Payment USSD Code
+    // ─────────────────────────────────────────────────────────────────────────────────────//
+    public String GenerateConfirmationPaymentCode(CategoryType category) {
+        switch (category) {
+            case ELECTRICITY:
+                return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1" + ",100100";
+            case WATER:
+                return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1" + ",100100";
+            case GAS:
+                return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1" + "100100" ;
             default:
                 return "";
         }
@@ -247,47 +280,18 @@ public class StepDefs
                     setBillPaymentCodePlaceholder();
                     return true;
 
-
-
-/*
-                case 2:
-                    double amount = Double.parseDouble(currentRow[5].replace(",", ""));
-                    if (amount > 100) {
-                        System.out.println("Step 2 FAILED - Amount too large: " + amount);
-                        return false;
-                    }
-                    System.out.println("Step 2 PASSED - Amount valid: " + amount);
-                    return true;
-
-
-
-
-
+                // ─────────────────────────────────────────────────────────────────────
+                //               Step 5— Generate Confirmation Payment Ussd Code
+                // ─────────────────────────────────────────────────────────────────────
                 case 5:
-                    System.out.println("Step 5 running... Checking payment message.");
-                    String paymentMessage = "تم الدفع بنجاح";
-                    if (paymentMessage.equals("تم الدفع بنجاح")) {
-                        System.out.println("Payment success message detected.");
-                        switch (companyCategory) {
-                            case ELECTRICITY:
-                                ElectricityBill = true;
-                                System.out.println("Electricity bill flag set to TRUE");
-                                break;
-                            case WATER:
-                                WaterBill = true;
-                                System.out.println("Water bill flag set to TRUE");
-                                break;
-                            case GAS:
-                                GasBill = true;
-                                System.out.println("Gas bill flag set to TRUE");
-                                break;
-                            default:
-                                System.out.println("Unknown category type!");
-                        }
-                    }
+                    confirmationPaymentCode = GenerateConfirmationPaymentCode(companyCategory);
                     return true;
-*/
-
+                // ────────────────────────────────────────────────────────────────────────────────
+                // Step 6— Set placeholder for Confirmation Payment USSD options dynamically
+                // ────────────────────────────────────────────────────────────────────────────────
+                case 6:
+                    setConfirmationPaymentCodePlaceholder();
+                    return true;
 
                 default:
                     return false;
