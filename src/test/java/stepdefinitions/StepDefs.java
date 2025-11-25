@@ -79,11 +79,10 @@ public class StepDefs
     {
         if (excelData == null) {
             excelData = ExcelUtils.readAllRows(
-                    " D:/AutomationWork/Cash_Regression_Framework/VFCash_Regression_Framework/" +
-                            "VFCash_Framework/resources/Data/DataTesting.xlsx"
+                    " D:/AutomationWork/Cash_Regression_Framework/TestingBill/src/" +
+                            "test/resources/Data/DataTesting.xlsx"
             );
         }
-
 
         while (currentRowIndex < excelData.size()) {
 
