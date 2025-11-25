@@ -79,10 +79,11 @@ public class StepDefs
     {
         if (excelData == null) {
             excelData = ExcelUtils.readAllRows(
-                    " D:/AutomationWork/Cash_Regression_Framework/TestingBill/src/" +
-                            "test/resources/Data/DataTesting.xlsx"
+                    "D:/AutomationWork/Cash_Regression_Framework/TestingBill/src/test/" +
+                            "resources/Data/DataTesting.xlsx"
             );
         }
+
 
         while (currentRowIndex < excelData.size()) {
 
@@ -165,7 +166,7 @@ public class StepDefs
     public void step5() {}
 
     //Step 6 ---- Set placeholder for  Confirmation Bill Payment Ussd Code
-    
+
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //            Set placeholder for BillPaymentCode to check invoice amount
     // ─────────────────────────────────────────────────────────────────────────────────────//
@@ -189,6 +190,16 @@ public class StepDefs
                 return "4," + category.getCode() + "," + companyCode + "," + billingAccountNumber + ",1" ;
             default:
                 return "";
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────────//
+    //                 Print BillPaymentCode dynamically per row
+    // ────────────────────────────────────────────────────────────────────────────────//
+    @Then("Print BillPaymentCode")
+    public void printBillPaymentCode() {
+        if (currentRowIndex < excelData.size() && currentBillPaymentCode != null) {
+            System.out.println("Print current PlaceHolder For testing: " + currentBillPaymentCode);
         }
     }
 
@@ -281,6 +292,7 @@ public class StepDefs
                 // ─────────────────────────────────────────────────────────────────────
                 case 4:
                     setBillPaymentCodePlaceholder();
+                    printBillPaymentCode();
                     return true;
 
                 // ─────────────────────────────────────────────────────────────────────
