@@ -159,9 +159,13 @@ public class StepDefs
     @Then("Generate bill payment code for current category")
     public void step3(){ }
 
+    //Step 4 ---- Set placeholder for BillPaymentCode to check invoice amount
+
     @Then("Generate Confirmation Payment Code")
     public void step5() {}
 
+    //Step 6 ---- Set placeholder for  Confirmation Bill Payment Ussd Code
+    
     // ─────────────────────────────────────────────────────────────────────────────────────//
     //            Set placeholder for BillPaymentCode to check invoice amount
     // ─────────────────────────────────────────────────────────────────────────────────────//
